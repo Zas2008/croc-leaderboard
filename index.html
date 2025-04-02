@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Croc Leaderboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #FFD700;
+            --dark: #1A1A1A;
+            --light: #F5F5F5;
+            --accent: #E63946;
+        }
+        
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--dark);
+            color: var(--light);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        header {
+            text-align: center;
+            padding: 2rem 0;
+            width: 100%;
+            background: linear-gradient(135deg, #2b5876 0%, #4e4376 100%);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3rem;
+            margin: 0;
+            background: linear-gradient(to right, var(--gold), #fff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+        }
+        
+        .leaderboard {
+            width: 90%;
+            max-width: 800px;
+            background: rgba(30, 30, 30, 0.8);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+        }
+        
+        .leaderboard-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            padding: 1rem 1.5rem;
+            background: rgba(0,0,0,0.3);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .member {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            padding: 1.2rem 1.5rem;
+            align-items: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .member:hover {
+            background: rgba(255, 215, 0, 0.1);
+            transform: scale(1.01);
+        }
+        
+        .member:last-child {
+            border-bottom: none;
+        }
+        
+        .member-name {
+            font-weight: 600;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .member-crocs, .member-time {
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .badge {
+            background: var(--gold);
+            color: var(--dark);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 100;
+        }
+        
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .modal-content {
+            background: var(--dark);
+            border-radius: 15px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #2b5876 0%, #4e4376 100%);
+            position: relative;
+        }
+        
+        .modal-title {
+            margin: 0;
+            font-family: 'Montserrat', sans-serif;
+            color: var(--gold);
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        
+        .wikipedia-embed {
+            width: 100%;
+            height: 400px;
+            border: none;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        
+        .achievements {
+            margin-top: 1.5rem;
+        }
+        
+        .achievement {
+            background: rgba(255,255,255,0.05);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.8rem;
+        }
+        
+        .achievement-title {
+            font-weight: 600;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            margin-top: auto;
+        }
+        
+        @media (max-width: 600px) {
+            .leaderboard-header, .member {
+                grid-template-columns: 1.5fr 1fr 1fr;
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .member-name {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Croc Leaderboard</h1>
+        <div class="subtitle">The Pinnacle of Aura Achievement</div>
+    </header>
+    
+    <div class="leaderboard">
+        <div class="leaderboard-header">
+            <div>Name</div>
+            <div>Crocs</div>
+            <div>Time to Achieve</div>
+        </div>
+        
+        <div class="member" data-member="leonidas">
+            <div class="member-name">
+                <span>🏛️</span>
+                Leonidas
+            </div>
+            <div class="member-crocs"><span class="badge">1</span></div>
+            <div class="member-time">Lifetime</div>
+        </div>
+        
+        <div class="member" data-member="metaxas">
+            <div class="member-name">
+                <span>⚔️</span>
+                Metaxas
+            </div>
+            <div class="member-crocs"><span class="badge">1</span></div>
+            <div class="member-time">45 years</div>
+        </div>
+        
+        <div class="member" data-member="odysseas">
+            <div class="member-name">
+                <span>🌊</span>
+                Odysseas
+            </div>
+            <div class="member-crocs"><span class="badge">1</span></div>
+            <div class="member-time">30 years</div>
+        </div>
+    </div>
+    
+    <div class="modal" id="memberModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Member</h2>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="memberBio"></div>
+                <iframe class="wikipedia-embed" id="wikipediaEmbed" src="" frameborder="0"></iframe>
+                <div class="achievements" id="memberAchievements"></div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        Only 3 individuals in history have achieved the Croc level aura
+    </footer>
+    
+    <script>
+        const members = {
+            leonidas: {
+                fullName: "Leonidas I of Sparta",
+                bio: "King of the Greek city-state of Sparta, and the 17th of the Agiad line, a dynasty which claimed descent from the mythological demigod Heracles. Leonidas led the Greek forces during the Second Persian War and became a legend when he and his 300 Spartans fought to the death at the Battle of Thermopylae.",
+                wikipediaUrl: "https://en.wikipedia.org/wiki/Leonidas_I",
+                achievements: [
+                    {
+                        title: "Battle of Thermopylae",
+                        description: "Led 300 Spartans and their allies against the massive Persian army, becoming a symbol of courage against overwhelming odds."
+                    },
+                    {
+                        title: "Military Reforms",
+                        description: "Strengthened Sparta's military capabilities and prepared the city-state for future conflicts."
+                    },
+                    {
+                        title: "Cultural Icon",
+                        description: "Became a symbol of sacrifice, courage and strength that persists to modern times."
+                    }
+                ]
+            },
+            metaxas: {
+                fullName: "Ioannis Metaxas",
+                bio: "Greek military officer and politician, serving as Prime Minister of Greece from 1936 until his death in 1941. He governed constitutionally for the first four months of his tenure, and thereafter as the strongman of the authoritarian 4th of August Regime.",
+                wikipediaUrl: "https://en.wikipedia.org/wiki/Ioannis_Metaxas",
+                achievements: [
+                    {
+                        title: "4th of August Regime",
+                        description: "Established an authoritarian government that modernized Greece and maintained neutrality at the start of WWII."
+                    },
+                    {
+                        title: "Ohi Day",
+                        description: "Rejected Mussolini's ultimatum leading to Greece's participation in WWII and creating the national 'Ohi Day' celebration."
+                    },
+                    {
+                        title: "Infrastructure Development",
+                        description: "Oversaw significant public works projects that improved Greek infrastructure."
+                    }
+                ]
+            },
+            odysseas: {
+                fullName: "Odysseas Androutsos",
+                bio: "A hero of the Greek War of Independence against the Ottoman Empire. As commander of the Greek forces in Eastern Continental Greece, he achieved fame and recognition for his leadership and military acumen.",
+                wikipediaUrl: "https://en.wikipedia.org/wiki/Odysseas_Androutsos",
+                achievements: [
+                    {
+                        title: "Battle of Gravia Inn",
+                        description: "Led a small force to victory against a much larger Ottoman army, becoming a legendary figure of the Greek Revolution."
+                    },
+                    {
+                        title: "Strategic Leadership",
+                        description: "Successfully commanded Greek forces in Eastern Continental Greece during critical early stages of the revolution."
+                    },
+                    {
+                        title: "Symbol of Revolution",
+                        description: "Became one of the most celebrated heroes of the Greek War of Independence."
+                    }
+                ]
+            }
+        };
+        
+        const modal = document.getElementById('memberModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const memberBio = document.getElementById('memberBio');
+        const wikipediaEmbed = document.getElementById('wikipediaEmbed');
+        const memberAchievements = document.getElementById('memberAchievements');
+        const closeModal = document.getElementById('closeModal');
+        
+        document.querySelectorAll('.member').forEach(member => {
+            member.addEventListener('click', () => {
+                const memberId = member.getAttribute('data-member');
+                const memberData = members[memberId];
+                
+                modalTitle.textContent = memberData.fullName;
+                memberBio.innerHTML = `<p>${memberData.bio}</p>`;
+                wikipediaEmbed.src = memberData.wikipediaUrl;
+                
+                memberAchievements.innerHTML = '<h3>Notable Achievements</h3>';
+                memberData.achievements.forEach(achievement => {
+                    memberAchievements.innerHTML += `
+                        <div class="achievement">
+                            <div class="achievement-title">${achievement.title}</div>
+                            <div class="achievement-description">${achievement.description}</div>
+                        </div>
+                    `;
+                });
+                
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+        });
+        
+        closeModal.addEventListener('click', () => {
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            wikipediaEmbed.src = '';
+        });
+        
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+                wikipediaEmbed.src = '';
+            }
+        });
+    </script>
+</body>
+</html>
